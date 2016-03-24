@@ -1,0 +1,29 @@
+{
+	"name": "armenio/armenio-date",
+	"description": "Date library",
+	"type": "library",
+	"keywords": [
+		"date",
+		"helper",
+		"zf2",
+		"armenio"
+	],
+	"homepage": "https://github.com/armenio/armenio-date",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Rafael Armênio",
+			"email": "rafael.armenio@gmail.com"
+		}
+	],
+	"require": {
+		"zf1/zend-registry": "1.*",
+		"zf1/zend-date": "1.*",
+		"zendframework/zendframework": "2.*"
+	},
+	"autoload": {
+		"psr-4": {
+			"Aircode\\Date\\": "src/"
+		}
+	},
+}
