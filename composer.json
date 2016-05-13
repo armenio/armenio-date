@@ -19,7 +19,7 @@
 	"require": {
 		"zf1/zend-registry": "1.*",
 		"zf1/zend-date": "1.*",
-		"zendframework/zendframework": "2.5.*"
+		"zendframework/zendframework": "2.*"
 	},
 	"autoload": {
 		"psr-4": {
