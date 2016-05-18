@@ -1,5 +1,14 @@
 <?php
+/**
+ * Rafael Armenio <rafael.armenio@gmail.com>
+ *
+ * @link http://github.com/armenio for the source repository
+ */
+ 
 namespace Armenio\Date;
+
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 use Zend_Date;
 use Zend_Date_Exception;
@@ -10,9 +19,21 @@ use Locale;
 /**
  * Helper for formatting dates.
  */
-class Date extends Zend_Date
+class Date extends Zend_Date implements ServiceLocatorAwareInterface
 {
-	const MYSQL_DATE	 = 'YYYY-MM-dd';
+    protected $serviceLocator;
+
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;
+    }
+
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
+
+    const MYSQL_DATE	 = 'YYYY-MM-dd';
 	const MYSQL_TIME	 = 'HH:mm:ss';
 	const MYSQL_DATETIME = 'YYYY-MM-dd HH:mm:ss';
 
