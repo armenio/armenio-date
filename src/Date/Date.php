@@ -14,12 +14,11 @@ use Zend_Date;
 use Zend_Date_Exception;
 use Zend_Locale;
 use Zend_Locale_Exception;
-use Locale;
 
 /**
  * Helper for formatting dates.
  */
-class Date extends Zend_Date implements ServiceLocatorAwareInterface
+class Date implements ServiceLocatorAwareInterface
 {
     protected $serviceLocator;
 
@@ -38,48 +37,57 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	const MYSQL_DATETIME = 'YYYY-MM-dd HH:mm:ss';
 
 	/**
-	 * Generates the standard date object, could be a unix timestamp, localized date,
-	 * string, integer, array and so on. Also parts of dates or time are supported
-	 * Always set the default timezone: http://php.net/date_default_timezone_set
-	 * For example, in your bootstrap: date_default_timezone_set('America/Los_Angeles');
-	 * For detailed instructions please look in the docu.
-	 *
-	 * @param  string|integer|Zend_Date|array  $date	OPTIONAL Date value or value of date part to set
-	 *												 ,depending on $part. If null the actual time is set
-	 * @param  string						  $part	OPTIONAL Defines the input format of $date
-	 * @param  string|Zend_Locale			  $locale  OPTIONAL Locale for parsing input
-	 * @return Zend_Date
-	 * @throws Zend_Date_Exception
-	 */
-	public function __construct($date = null, $part = null, $locale = null, $timezone = null)
-	{
-		if( $part == 'date' ){
+     * Generates the standard date object, could be a unix timestamp, localized date,
+     * string, integer, array and so on. Also parts of dates or time are supported
+     * Always set the default timezone: http://php.net/date_default_timezone_set
+     * For example, in your bootstrap: date_default_timezone_set('America/Los_Angeles');
+     * For detailed instructions please look in the docu.
+     *
+     * @param  string|integer|Zend_Date|array  $date    OPTIONAL Date value or value of date part to set
+     *                                                 ,depending on $part. If null the actual time is set
+     * @param  string                          $part    OPTIONAL Defines the input format of $date
+     * @param  string|Zend_Locale              $locale  OPTIONAL Locale for parsing input
+     * @return Zend_Date
+     * @throws Zend_Date_Exception
+     */
+    public function getZendDate($date = null, $part = null, $locale = null, $timezone = null)
+    {
+		if( $part === 'date' ){
 			$part = Zend_Date::DATE_MEDIUM;
 		}
 
-		if( $part == 'time' ){
+		if( $part === 'time' ){
 			$part = Zend_Date::TIME_MEDIUM;
 		}
 
-		if( $part == 'datetime' ){
+		if( $part === 'datetime' ){
 			$part = Zend_Date::DATETIME_MEDIUM;
 		}
 
-		if ($locale == null) {
-			$locale = Locale::getDefault();
-		}
-
-		if ($timezone !== null) {
-			$this->setTimezone($timezone);
+		if ($locale === null) {
+			$locale = 'pt_BR';
 		}
 
 		try{
-			parent::__construct($date, $part, $locale);
+			$zendDate = new Zend_Date($date, $part, $locale);
 		}catch(Zend_Date_Exception $e){
-			parent::__construct(null, $part, $locale);
+			$zendDate = new Zend_Date(null, $part, $locale);
 		}catch(Zend_Locale_Exception $e2){
-			parent::__construct();
+			$zendDate = new Zend_Date();
 		}
+
+		if( $timezone !== null ){
+			$zendDate->setTimezone($timezone);
+		}
+
+		return $zendDate;
+	}
+
+	public function get($format, $date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
+	{
+		$zendDate = $this->getZendDate($date, $part, $localeFrom, $timezone);
+
+		return $zendDate->get($format, $localeTo);
 	}
 
 	/**
@@ -91,8 +99,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 */
 	function isTimestamp($timestamp)
 	{
-		$check = (is_int($timestamp) || is_float($timestamp)) ? $timestamp : (string) (int) $timestamp;
-		return  ($check === $timestamp) && ( (int) $timestamp <=  PHP_INT_MAX) && ( (int) $timestamp >= ~PHP_INT_MAX);
+		$check = ( is_int($timestamp) || is_float($timestamp) ) ? $timestamp : (string) (int) $timestamp;
+
+		return  ( $check === $timestamp ) && ( (int) $timestamp <= PHP_INT_MAX ) && ( (int) $timestamp >= ~PHP_INT_MAX );
 	}
 
 	/**
@@ -101,13 +110,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatDate($locale = null)
+	public function formatDate($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(Zend_Date::DATE_MEDIUM, $locale);
+		return $this->get(Zend_Date::DATE_MEDIUM, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 
 	/**
@@ -116,13 +121,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatTime($locale = null)
+	public function formatTime($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(Zend_Date::TIME_MEDIUM, $locale);
+		return $this->get(Zend_Date::TIME_MEDIUM, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 
 	/**
@@ -131,13 +132,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatDateTime($locale = null)
+	public function formatDateTime($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(Zend_Date::DATETIME_MEDIUM, $locale);
+		return $this->get(Zend_Date::DATETIME_MEDIUM, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 
 	/**
@@ -146,13 +143,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatDbDate($locale = null)
+	public function formatDbDate($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(self::MYSQL_DATE, $locale);
+		return $this->get(self::MYSQL_DATE, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 
 	/**
@@ -161,13 +154,9 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatDbTime($locale = null)
+	public function formatDbTime($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(self::MYSQL_TIME, $locale);
+		return $this->get(self::MYSQL_TIME, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 
 	/**
@@ -176,12 +165,8 @@ class Date extends Zend_Date implements ServiceLocatorAwareInterface
 	 * @param  string|Zend_Locale $locale
 	 * @return string
 	 */
-	public function formatDbDateTime($locale = null)
+	public function formatDbDateTime($date = null, $part = null, $localeFrom = null, $localeTo = null, $timezone = null)
 	{
-		if( $locale === null ){
-			$locale = $this->getLocale();
-		}
-
-		return $this->get(self::MYSQL_DATETIME, $locale);
+		return $this->get(self::MYSQL_DATETIME, $date, $part, $localeFrom, $localeTo, $timezone);
 	}
 }
