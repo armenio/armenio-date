@@ -7,10 +7,10 @@
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
-return array(
-    'service_manager' => array(
-        'factories' => array(
+return [
+    'service_manager' => [
+        'factories' => [
             'Armenio\Date' => 'Armenio\Date\DateServiceFactory',
-        ),
-    ),    
-);
+        ],
+    ],    
+];
